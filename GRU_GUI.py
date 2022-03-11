@@ -25,7 +25,7 @@ layout.addWidget(eventButton,1,2)
 eventOut = QLineEdit("")
 layout.addWidget(eventOut,1,3)
 ##### Calculate values
-layout.addWidget(QLabel("# of steps to run"),2,0)
+layout.addWidget(QLabel("steps , multiplier"),2,0)
 
 stepLine = QLineEdit("")
 layout.addWidget(stepLine,2,1)
@@ -86,6 +86,9 @@ layout.addWidget(redOut,9,1)
 layout.addWidget(QLabel("Blue Out"),9,2)
 blueOut = QLineEdit("")
 layout.addWidget(blueOut,9,3)
+
+gameOut = QLineEdit("")
+layout.addWidget(gameOut,10,0,1,4)
 #####
 window.setLayout(layout)
 
@@ -95,7 +98,7 @@ def loadTBA():
     try:
         GRU.loadTBA(eventKey)
         GRU.average = np.array([10.0 for i in range(GRU.numTeams)])
-        GRU.variance = np.array([10.0 for i in range(GRU.numTeams)])
+        GRU.variance = np.array([100.0 for i in range(GRU.numTeams)])
         eventOut.setText("Done!")
     except Exception as e:
         eventOut.setText(str(e))
@@ -103,9 +106,16 @@ def loadTBA():
 def runSteps():
     print("runSteps")
     try:
-        steps = int(stepLine.text())
+        line = stepLine.text()
+        if ',' in line:
+            steps,mult = line.split(",")
+            steps = int(steps)
+            mult = float(mult)
+        else:
+            steps = int(stepLine.text())
+            mult = 1
         for i in range(steps):
-            GRU.step()
+            GRU.step(mult)
             stepProgress.setValue(int((i+1)/steps*100))
         stepOut.setText(f"log prob:{GRU.relLogProb(GRU.average, GRU.variance):.2f}")
     except Exception as e:
@@ -143,6 +153,8 @@ def calcGame():
                 blueAvg += avg
                 blueVar += var
         blueOut.setText(f"{blueAvg:.2f}+-{np.sqrt(blueVar):.2f}")
+
+        gameOut.setText(GRU.winStr(redAvg,redVar,blueAvg,blueVar))
     except Exception as e:
         redOut.setText(str(e))
 

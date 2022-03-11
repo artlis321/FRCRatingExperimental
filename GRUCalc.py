@@ -6,6 +6,7 @@ import requests
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from tqdm import tqdm
+from scipy.stats import norm
 
 class Main():
     def __init__(self):
@@ -47,6 +48,14 @@ class Main():
         key = 'frc'+str(num)
         ind = self.teamInds[key]
         return self.average[ind],self.variance[ind]
+
+    def winStr(self,redAvg,redVar,blueAvg,blueVar):
+        if blueAvg > redAvg:
+            return f"Blue wins {norm.cdf((blueAvg-redAvg)/(blueVar+redVar)**0.5):0.2f}"
+        if redAvg > blueAvg:
+            return f"Red wins {norm.cdf((redAvg-blueAvg)/(blueVar+redVar)**0.5):0.2f}"
+        else:
+            return "A draw!?"
 
     def updateBaseVals(self):
         self.teamKeysAll = [t['key'] for t in self.teamsAPI]
@@ -103,14 +112,15 @@ class Main():
             for i in range(self.numTeams):
                 if self.participation[j][i]:
                     gradAvg[i] -= sCalc[j] / vCalc[j]
-                    gradVar[i] -= sCalc[j]**2 / (2*vCalc[j]**2) + 0.5/(2*np.pi*vCalc[j])
+                    gradVar[i] += sCalc[j]**2 / (2*vCalc[j]**2) - 0.5/(2*np.pi*vCalc[j])
 
         return gradAvg,np.linalg.norm(gradAvg),gradVar,np.linalg.norm(gradVar)
 
-    def step(self):
+    def step(self,mult):
         gradAvg,lenAvg,gradVar,lenVar = self.gradAll()
-        self.average += gradAvg / lenAvg**0.9
-        self.variance += gradVar / lenVar**0.9
+        self.average += mult*gradAvg / lenAvg**0.9
+        self.variance += mult*gradVar / lenVar**0.9
+        self.average = np.abs(self.average)
         self.variance = np.abs(self.variance)
         #print(self.relLogProb(self.average,self.variance))
 
