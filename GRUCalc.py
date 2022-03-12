@@ -57,6 +57,17 @@ class Main():
         else:
             return "A draw!?"
 
+    def sortedTeamVals(self):
+        struct = np.array([('',0,0) for _ in range(self.numTeams)],dtype=[('key',object),('avg',float),('var',float)])
+        for i in range(self.numTeams):
+            key = self.teamKeys[i]
+            ind = self.teamInds[key]
+            avg = self.average[ind]
+            var = self.variance[ind]
+            struct[i] = (key,avg,var)
+        struct = np.flip(struct[np.argsort(struct['avg'])])
+        return struct
+
     def updateBaseVals(self):
         self.teamKeysAll = [t['key'] for t in self.teamsAPI]
         self.numMatches = sum(self.matchBool)
@@ -90,6 +101,7 @@ class Main():
                 del self.teamKeys[t]
                 self.participation = np.delete(self.participation,t,1)
         self.numTeams = len(self.teamKeys)
+        self.numMatches = len(self.participation)
         self.teamInds = { self.teamKeys[i]:i for i in range(self.numTeams) }
 
     def logNormalizedGaussian(self,average,variance,x):

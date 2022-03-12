@@ -50,10 +50,14 @@ layout.addWidget(teamButton,4,2)
 teamOut = QLineEdit("")
 layout.addWidget(teamOut,4,3)
 ##### Input of team values
-layout.addWidget(QLabel("Game Prediction"),5,0)
+gameButton = QPushButton("Predict Game")
+layout.addWidget(gameButton,5,0,1,2)
 
-gameButton = QPushButton("Calculate")
-layout.addWidget(gameButton,5,1)
+fileButton = QPushButton("File Output")
+layout.addWidget(fileButton,5,2)
+
+fileName = QLineEdit("")
+layout.addWidget(fileName,5,3)
 
 layout.addWidget(QLabel("Red 1"),6,0)
 red1 = QLineEdit("")
@@ -99,7 +103,7 @@ def loadTBA():
         GRU.loadTBA(eventKey)
         GRU.average = np.array([10.0 for i in range(GRU.numTeams)])
         GRU.variance = np.array([100.0 for i in range(GRU.numTeams)])
-        eventOut.setText("Done!")
+        eventOut.setText(f"Loaded {GRU.numMatches} results")
     except Exception as e:
         eventOut.setText(str(e))
 
@@ -131,6 +135,17 @@ def getTeam():
     except Exception as e:
         teamOut.setText(str(e))
 
+def fileOut():
+    print("fileOut")
+    try:
+        struct = GRU.sortedTeamVals()
+        with open(fileName.text(),'w') as fOut:
+            for i in range(len(struct)):
+                s = struct[i]
+                fOut.write(f"#{i+1:<2} : {s['key']:8}|=>\t{s['avg']:.2f}+-{s['var']**0.5:.2f}\n")
+    except Exception as e:
+        fileName.setText(str(e))
+
 def calcGame():
     print("calcGame")
     try:
@@ -142,7 +157,7 @@ def calcGame():
                 avg,var = GRU.valFromNum(num)
                 redAvg += avg
                 redVar += var
-        redOut.setText(f"{redAvg:.2f}+-{np.sqrt(redVar):.2f}")
+        redOut.setText(f"{redAvg:.2f}+-{redVar**0.5:.2f}")
 
         blueAvg = 0
         blueVar = 0
@@ -152,7 +167,7 @@ def calcGame():
                 avg,var = GRU.valFromNum(num)
                 blueAvg += avg
                 blueVar += var
-        blueOut.setText(f"{blueAvg:.2f}+-{np.sqrt(blueVar):.2f}")
+        blueOut.setText(f"{blueAvg:.2f}+-{blueVar**0.5:.2f}")
 
         gameOut.setText(GRU.winStr(redAvg,redVar,blueAvg,blueVar))
     except Exception as e:
@@ -161,6 +176,7 @@ def calcGame():
 eventButton.clicked.connect(loadTBA)
 stepButton.clicked.connect(runSteps)
 teamButton.clicked.connect(getTeam)
+fileButton.clicked.connect(fileOut)
 gameButton.clicked.connect(calcGame)
 
 window.show()
