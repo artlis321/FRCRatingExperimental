@@ -43,6 +43,9 @@ class Main():
 
         self.updateBaseVals()
 
+        self.average = np.array([10.0 for i in range(self.numTeams)])
+        self.variance = np.array([100.0 for i in range(self.numTeams)])
+
     def valFromNum(self,num):
         key = 'frc'+str(num)
         ind = self.teamInds[key]
@@ -120,10 +123,8 @@ class Main():
         gradVar = np.zeros(self.numTeams)
 
         for j in range(self.numMatches):
-            for i in range(self.numTeams):
-                if self.participation[j][i]:
-                    gradAvg[i] -= sCalc[j] / vCalc[j]
-                    gradVar[i] += sCalc[j]**2 / (2*vCalc[j]**2) - 0.5/(2*np.pi*vCalc[j])
+            gradAvg -= self.participation[j] * sCalc[j] / vCalc[j]
+            gradVar += self.participation[j] * (sCalc[j]**2 / (2*vCalc[j]**2) - 0.5/(2*np.pi*vCalc[j]))
 
         return gradAvg,np.linalg.norm(gradAvg),gradVar,np.linalg.norm(gradVar)
 

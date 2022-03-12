@@ -101,8 +101,6 @@ def loadTBA():
     eventKey = eventLine.text()
     try:
         GRU.loadTBA(eventKey)
-        GRU.average = np.array([10.0 for i in range(GRU.numTeams)])
-        GRU.variance = np.array([100.0 for i in range(GRU.numTeams)])
         eventOut.setText(f"Loaded {GRU.numMatches} results")
     except Exception as e:
         eventOut.setText(str(e))
