@@ -3,9 +3,6 @@ import scipy.sparse.linalg
 import scipy.linalg
 import numpy as np
 import requests
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from tqdm import tqdm
 from scipy.stats import norm
 
 class Main():
