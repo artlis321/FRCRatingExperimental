@@ -31,8 +31,10 @@ class Main():
         self.variance = []
 
     def loadTBA(self,eventString):
+        with open("TBAAuthKey.txt","r") as keyFile:
+            key = keyFile.readline()
         baseURL = 'http://www.thebluealliance.com/api/v3/'
-        header = {'X-TBA-Auth-Key':'y979sLSaQhjmZIGv5UDsIt4Oh5p2yZQiwGaKkKECky1LT4SEV2vpGfGNfEGLAbav'}
+        header = {'X-TBA-Auth-Key':key}
         
         def getTBA(url):
             return requests.get(baseURL+url,headers=header).json()
