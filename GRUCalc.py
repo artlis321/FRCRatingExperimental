@@ -28,18 +28,18 @@ class Main():
         self.variance = []
 
     def loadTBA(self,eventString):
-        with open("TBAAuthKey.txt","r") as keyFile:
-            key = keyFile.readline()
+        with open("TBAAuthKey.txt","r") as keyFile: # gets read key from file
+            key = keyFile.readline() 
         baseURL = 'http://www.thebluealliance.com/api/v3/'
         header = {'X-TBA-Auth-Key':key}
         
-        def getTBA(url):
+        def getTBA(url): # defines function for pulling data from TBA
             return requests.get(baseURL+url,headers=header).json()
 
-        self.teamsAPI = getTBA("event/"+eventString+"/teams")
-        self.matchesAPI = getTBA("event/"+eventString+"/matches")
-        self.matchesAPI = [match for match in self.matchesAPI if match['alliances']['red']['score'] != -1]
-        self.matchBool = np.array([True for i in range(2*len(self.matchesAPI))])
+        self.teamsAPI = getTBA("event/"+eventString+"/teams") # pulls data about teams
+        self.matchesAPI = getTBA("event/"+eventString+"/matches") # pulls data about matches
+        self.matchesAPI = [match for match in self.matchesAPI if match['alliances']['red']['score'] != -1] # removes matches that weren't played yet
+        self.matchBool = np.array([True for i in range(2*len(self.matchesAPI))]) # (unused at the moment) which results are to be used in calculation
 
         self.updateBaseVals()
 
@@ -71,14 +71,14 @@ class Main():
         return struct
 
     def updateBaseVals(self):
-        self.teamKeysAll = [t['key'] for t in self.teamsAPI]
-        self.numMatches = sum(self.matchBool)
+        self.teamKeysAll = [t['key'] for t in self.teamsAPI] # converts api to list
+        self.numMatches = sum(self.matchBool) # counts number of match results to be used for calc
 
-        tempNumTeams = len(self.teamKeysAll)
-        tempTeamInds = {self.teamKeysAll[i]:i for i in range(tempNumTeams)}
+        tempNumTeams = len(self.teamKeysAll) # gets list of all teams
+        tempTeamInds = {self.teamKeysAll[i]:i for i in range(tempNumTeams)} # assigns each team an index for list comprehension
 
-        self.participation = np.zeros( (self.numMatches,tempNumTeams) )
-        self.score = np.empty( (self.numMatches) )
+        self.participation = np.zeros( (self.numMatches,tempNumTeams) ) # creates participation matrix (rows are matches, columns are teams)
+        self.score = np.empty( (self.numMatches) ) # creates score vector (value for each match result)
 
         # takes data from matchesAPI and separates it into the two sides
         matchesSplit = []
