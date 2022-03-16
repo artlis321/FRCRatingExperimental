@@ -130,8 +130,8 @@ class Main():
 
     def step(self,mult):
         gradAvg,lenAvg,gradVar,lenVar = self.gradAll()
-        self.average += mult*gradAvg / lenAvg**0.9
-        self.variance += mult*gradVar / lenVar**0.9
+        self.average += mult*gradAvg / lenAvg
+        self.variance += mult*gradVar / lenVar
         self.average = np.abs(self.average)
         self.variance = np.abs(self.variance)
         #print(self.relLogProb(self.average,self.variance))
@@ -139,3 +139,12 @@ class Main():
     def multiStep(self,num):
         for i in range(num):
             self.step()
+
+    def smartMultiStep(self,num,mult):
+        curP = self.relLogProb(self.average,self.variance)
+        for i in range(num):
+            self.step(mult)
+            newP = self.relLogProb(self.average,self.variance)
+            if curP > newP:
+                mult /= 2
+            curP = newP
